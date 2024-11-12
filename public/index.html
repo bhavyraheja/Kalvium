@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Co-Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  
+  <!-- Add your CSS styling here -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f3f4f6;
+    }
+
+    #container {
+      background: #ffffff;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    #pdf-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+    }
+
+    #controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    #pageInfo {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+  </style>
+</head>
+
+
+<!-- public/index.html -->
+<body>
+    <div id="container">
+      <h1>PDF Co-Viewer</h1>
+      <div id="pdf-container"></div>
+      <div id="controls">
+        <button id="prevBtn" class="btn">◀ Previous</button>
+        <span id="pageInfo">Page <span id="currentPage">1</span> / <span id="totalPages">0</span></span>
+        <button id="nextBtn" class="btn">Next ▶</button>
+      </div>
+    </div>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+      // PDF.js setup
+      const url = 'sample.pdf'; // Relative path to your PDF file
+  
+      // Initialize PDF variables
+      let pdfDoc = null,
+          pageNum = 1,
+          scale = 1.2, // Adjust this for initial zoom level
+          canvas = document.createElement('canvas'),
+          ctx = canvas.getContext('2d');
+  
+      document.getElementById('pdf-container').appendChild(canvas);
+  
+      // Load the PDF
+      pdfjsLib.getDocument(url).promise.then(pdf => {
+        pdfDoc = pdf;
+        document.getElementById('totalPages').textContent = pdf.numPages;
+        renderPage(pageNum);
+      });
+  
+      // Render the current page
+      function renderPage(num) {
+        pdfDoc.getPage(num).then(page => {
+          const viewport = page.getViewport({ scale });
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+  
+          const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+          };
+          page.render(renderContext);
+        });
+        document.getElementById('currentPage').textContent = num;
+      }
+  
+      // Button event listeners for page navigation
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (pageNum <= 1) return;
+        pageNum--;
+        renderPage(pageNum);
+      });
+  
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (pageNum >= pdfDoc.numPages) return;
+        pageNum++;
+        renderPage(pageNum);
+      });
+    </script>
+  </body>
+  
+</html>
+
